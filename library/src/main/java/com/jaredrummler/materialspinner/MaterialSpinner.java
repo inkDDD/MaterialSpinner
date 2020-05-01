@@ -35,10 +35,12 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -77,6 +79,8 @@ public class MaterialSpinner extends TextView {
   private int popupPaddingBottom;
   private int popupPaddingRight;
   private String hintText;
+
+  private LinearLayout list;
 
   public MaterialSpinner(Context context) {
     super(context);
@@ -138,6 +142,8 @@ public class MaterialSpinner extends TextView {
           ta.getDimensionPixelSize(R.styleable.MaterialSpinner_ms_popup_padding_bottom, defaultPopupPaddingBottom);
       popupPaddingRight =
           ta.getDimensionPixelSize(R.styleable.MaterialSpinner_ms_popup_padding_right, defaultPopupPaddingRight);
+      arrowDrawable =
+              ta.getDrawable(R.styleable.MaterialSpinner_ms_hint_drawable);
       arrowColorDisabled = Utils.lighter(arrowColor, 0.8f);
     } finally {
       ta.recycle();
@@ -156,7 +162,7 @@ public class MaterialSpinner extends TextView {
     }
 
     if (!hideArrow) {
-      arrowDrawable = Utils.getDrawable(context, R.drawable.ms__arrow).mutate();
+//      arrowDrawable = Utils.getDrawable(context, R.drawable.ms__arrow).mutate();
       arrowDrawable.setColorFilter(arrowColor, PorterDuff.Mode.SRC_IN);
       Drawable[] drawables = getCompoundDrawables();
       if (rtl) {
@@ -167,7 +173,10 @@ public class MaterialSpinner extends TextView {
       setCompoundDrawablesWithIntrinsicBounds(drawables[0], drawables[1], drawables[2], drawables[3]);
     }
 
-    listView = new ListView(context);
+    list = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.ms__list, null, false);
+
+
+    listView = list.findViewById(R.id.ms__list_view);
     listView.setId(getId());
     listView.setDivider(null);
     listView.setItemsCanFocus(true);
@@ -185,7 +194,7 @@ public class MaterialSpinner extends TextView {
         Object item = adapter.get(position);
         adapter.notifyItemSelected(position);
         setTextColor(textColor);
-        setText(item.toString());
+        setText(hintText);
         collapse();
         if (onItemSelectedListener != null) {
           //noinspection unchecked
@@ -195,9 +204,11 @@ public class MaterialSpinner extends TextView {
     });
 
     popupWindow = new PopupWindow(context);
-    popupWindow.setContentView(listView);
+    popupWindow.setContentView(list);
     popupWindow.setOutsideTouchable(true);
     popupWindow.setFocusable(true);
+
+
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       popupWindow.setElevation(16);
@@ -242,7 +253,7 @@ public class MaterialSpinner extends TextView {
       }
       setText(longestItem);
       super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-      setText(currentText);
+      setText(hintText);
     } else {
       super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -321,7 +332,7 @@ public class MaterialSpinner extends TextView {
           setText(hintText);
         } else {
           setTextColor(textColor);
-          setText(adapter.get(selectedIndex).toString());
+          setText(hintText);
         }
         adapter.notifyItemSelected(selectedIndex);
       }
@@ -365,7 +376,7 @@ public class MaterialSpinner extends TextView {
       if (position >= 0 && position <= adapter.getCount()) {
         adapter.notifyItemSelected(position);
         selectedIndex = position;
-        setText(adapter.get(position).toString());
+        setText(hintText);
       } else {
         throw new IllegalArgumentException("Position must be lower than adapter count!");
       }
@@ -454,10 +465,10 @@ public class MaterialSpinner extends TextView {
         setHintColor(hintColor);
       } else {
         setTextColor(textColor);
-        setText(adapter.get(selectedIndex).toString());
+        setText(hintText);
       }
     } else {
-      setText("");
+      setText(hintText);
     }
     if (shouldResetPopupHeight) {
       popupWindow.setHeight(calculatePopupWindowHeight());

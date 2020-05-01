@@ -35,6 +35,8 @@
       app:ms_dropdown_max_height="350dp"
       app:ms_dropdown_height="wrap_content"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content"
+      app:ms_hint_drawable="@drawable/ic_add_24dp"
+      app:ms_hint="新增"/>
 
 </RelativeLayout>
